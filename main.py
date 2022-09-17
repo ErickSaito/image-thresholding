@@ -16,4 +16,41 @@ def global_thresholding(image_path, limiar=125, show=False):
     plt.imshow(img, 'gray', vmin=0, vmax=255)
     plt.show()
 
-global_thresholding('images/baboon.pgm')
+def bernsen(image_path, cont_limit=15, neighborhood=5, show=False):
+  np.seterr(over='ignore')
+  img_name = image_path.split('/')[-1]
+  img = cv.imread(image_path)
+  gray_img = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
+  copy_img = gray_img.copy()
+
+  height = gray_img.shape[0]
+  width = gray_img.shape[1]
+  img_size = height * width
+  radius = int(neighborhood/2)
+
+  for i in range(radius + 1, height - radius):
+    for j in range(radius + 1, width - radius):
+      block = gray_img[i-radius:i+radius, j-radius:j+radius]
+
+      z_minimum = block.min()
+      z_maximum = block.max()
+      threshold = (z_minimum + z_maximum)/2
+      contrast = z_maximum - z_minimum
+
+      if contrast < cont_limit:
+        threshold_class = 255
+      else:
+        threshold_class = threshold
+
+      if gray_img[i,j] < threshold_class:
+        copy_img[i,j] = 0
+      else:
+        copy_img[i,j] = 255
+        
+  cv.imwrite(f'results/bernsen-{img_name}', copy_img)
+  if show:
+    plt.imshow(copy_img, 'gray', vmin=0, vmax=255)
+    plt.show()
+
+# global_thresholding('images/baboon.pgm')
+# bernsen('images/sonnet.pgm')
