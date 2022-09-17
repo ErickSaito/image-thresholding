@@ -52,5 +52,37 @@ def bernsen(image_path, cont_limit=15, neighborhood=5, show=False):
     plt.imshow(copy_img, 'gray', vmin=0, vmax=255)
     plt.show()
 
+def niblack(image_path, k, neighborhood=15):
+  img_name = image_path.split('/')[-1]
+  img = cv.imread(image_path)
+  gray_img = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
+  copy_img = gray_img.copy()
+
+  height = gray_img.shape[0]
+  width = gray_img.shape[1]
+  img_size = height * width
+  radius = int(neighborhood/2)
+
+  for i in range(radius + 1, height - radius):
+    for j in range(radius + 1, width - radius):
+      block = gray_img[i-radius:i+radius, j-radius:j+radius]
+
+      mean = np.mean(block)
+      std = np.std(block)
+
+      threshold = mean + k * std
+
+      if gray_img[i,j] < threshold:
+        copy_img[i,j] = 255
+      else:
+        copy_img[i,j] = 0
+        
+  cv.imwrite(f'results/niblack-{img_name}', copy_img)
+  if show:
+    plt.imshow(copy_img, 'gray', vmin=0, vmax=255)
+    plt.show()
+
+
 # global_thresholding('images/baboon.pgm')
 # bernsen('images/sonnet.pgm')
+niblack('images/sonnet.pgm', 0.1, 25)
