@@ -15,7 +15,7 @@ def save_image(image_path: str, name: str, img):
 def get_image_defitions(img, n):
   height = img.shape[0]
   width = img.shape[1]
-  img_size = height * width
+  img_size = img.size
   radius = int(n/2)
 
   return height, width, img_size, radius
@@ -32,42 +32,32 @@ def global_thresholding(image_path, limiar=125, show=False):
     plt.imshow(img, 'gray', vmin=0, vmax=255)
     plt.show()
 
-def bernsen(image_path, cont_limit=15, neighborhood=5, show=False):
+def bernsen(image_path, n=10, show=True):
   np.seterr(over='ignore')
   gray_img = open_image(image_path)
-  copy_img = gray_img.copy()
 
-  height, width, img_size, radius = get_image_defitions(gray_img, neighborhood)
+  height, width, img_size, radius = get_image_defitions(gray_img, n)
 
   for i in range(radius + 1, height - radius):
     for j in range(radius + 1, width - radius):
       block = gray_img[i-radius:i+radius, j-radius:j+radius]
 
-      z_minimum = block.min()
-      z_maximum = block.max()
-      threshold = (z_minimum + z_maximum)/2
-      contrast = z_maximum - z_minimum
+      threshold = int((block.min() + block.max())/2)
 
-      if contrast < cont_limit:
-        threshold_class = 255
+      if gray_img[i,j] < threshold:
+        gray_img[i,j] = 0
       else:
-        threshold_class = threshold
-
-      if gray_img[i,j] < threshold_class:
-        copy_img[i,j] = 0
-      else:
-        copy_img[i,j] = 255
+        gray_img[i,j] = 255
         
-  save_image(image_path, 'bernsen', copy_img)
+  save_image(image_path, 'bernsen', gray_img)
   if show:
-    plt.imshow(copy_img, 'gray', vmin=0, vmax=255)
+    plt.imshow(gray_img, 'gray', vmin=0, vmax=255)
     plt.show()
 
-def niblack(image_path, k, neighborhood=15, show=False):
+def niblack(image_path, k, n=15, show=True):
   gray_img = open_image(image_path)
-  copy_img = gray_img.copy()
 
-  height, width, img_size, radius = get_image_defitions(gray_img, neighborhood)
+  height, width, img_size, radius = get_image_defitions(gray_img, n)
 
   for i in range(radius + 1, height - radius):
     for j in range(radius + 1, width - radius):
@@ -79,17 +69,42 @@ def niblack(image_path, k, neighborhood=15, show=False):
       threshold = mean + k * std
 
       if gray_img[i,j] < threshold:
-        copy_img[i,j] = 255
+        gray_img[i,j] = 0
       else:
-        copy_img[i,j] = 0
+        gray_img[i,j] = 255
         
-  save_image(image_path, 'niblack', copy_img)
+  save_image(image_path, 'niblack', gray_img)
 
   if show:
-    plt.imshow(copy_img, 'gray', vmin=0, vmax=255)
+    plt.imshow(gray_img, 'gray', vmin=0, vmax=255)
     plt.show()
 
+def sauvola_pietaksinen(image_path, k=0.5, n=7, r=128, show=True):
+  gray_img = open_image(image_path)
+
+  height, width, img_size, radius = get_image_defitions(gray_img, n)
+
+  for i in range(radius + 1, height - radius):
+    for j in range(radius + 1, width - radius):
+      block = gray_img[i-radius:i+radius, j-radius:j+radius]
+
+      mean = np.mean(block)
+      std = np.std(block)
+
+      threshold = mean * (1 + k * ((std / r) - 1))
+
+      if gray_img[i,j] < threshold:
+        gray_img[i,j] = 0
+      else:
+        gray_img[i,j] = 255
+
+  save_image(image_path, 'sauvola_pietaksinen', gray_img)
+
+  if show:
+    plt.imshow(gray_img, 'gray', vmin=0, vmax=255)
+    plt.show()
 
 # global_thresholding('images/baboon.pgm')
-# bernsen('images/sonnet.pgm')
-niblack('images/sonnet.pgm', 0.1, 25)
+# bernsen('images/baboon.pgm')
+# niblack('images/monarch.pgm', 1, 7)
+sauvola_pietaksinen('images/monarch.pgm')
