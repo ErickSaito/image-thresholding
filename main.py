@@ -2,15 +2,31 @@ import cv2 as cv
 import numpy as np
 from matplotlib import pyplot as plt
 
-def global_thresholding(image_path, limiar=125, show=False):
-  img_name = image_path.split('/')[-1]
+def open_image(image_path: str):
   img = cv.imread(image_path)
   gray_img = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
+
+  return gray_img
+
+def save_image(image_path: str, name: str, img):
+  img_name = image_path.split('/')[-1]
+  cv.imwrite(f'results/{name}-{img_name}', img)
+
+def get_image_defitions(img, n):
+  height = img.shape[0]
+  width = img.shape[1]
+  img_size = height * width
+  radius = int(n/2)
+
+  return height, width, img_size, radius
+
+def global_thresholding(image_path, limiar=125, show=False):
+  gray_img = open_image(image_path)
 
   gray_img[gray_img < limiar] = 0
   gray_img[gray_img >= limiar] = 255
   
-  cv.imwrite(f'results/global_thresholding-{img_name}', gray_img)
+  save_image(image_path, 'global_thresholding', gray_img)
 
   if show:
     plt.imshow(img, 'gray', vmin=0, vmax=255)
@@ -18,15 +34,10 @@ def global_thresholding(image_path, limiar=125, show=False):
 
 def bernsen(image_path, cont_limit=15, neighborhood=5, show=False):
   np.seterr(over='ignore')
-  img_name = image_path.split('/')[-1]
-  img = cv.imread(image_path)
-  gray_img = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
+  gray_img = open_image(image_path)
   copy_img = gray_img.copy()
 
-  height = gray_img.shape[0]
-  width = gray_img.shape[1]
-  img_size = height * width
-  radius = int(neighborhood/2)
+  height, width, img_size, radius = get_image_defitions(gray_img, neighborhood)
 
   for i in range(radius + 1, height - radius):
     for j in range(radius + 1, width - radius):
@@ -47,21 +58,16 @@ def bernsen(image_path, cont_limit=15, neighborhood=5, show=False):
       else:
         copy_img[i,j] = 255
         
-  cv.imwrite(f'results/bernsen-{img_name}', copy_img)
+  save_image(image_path, 'bernsen', copy_img)
   if show:
     plt.imshow(copy_img, 'gray', vmin=0, vmax=255)
     plt.show()
 
-def niblack(image_path, k, neighborhood=15):
-  img_name = image_path.split('/')[-1]
-  img = cv.imread(image_path)
-  gray_img = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
+def niblack(image_path, k, neighborhood=15, show=False):
+  gray_img = open_image(image_path)
   copy_img = gray_img.copy()
 
-  height = gray_img.shape[0]
-  width = gray_img.shape[1]
-  img_size = height * width
-  radius = int(neighborhood/2)
+  height, width, img_size, radius = get_image_defitions(gray_img, neighborhood)
 
   for i in range(radius + 1, height - radius):
     for j in range(radius + 1, width - radius):
@@ -77,7 +83,8 @@ def niblack(image_path, k, neighborhood=15):
       else:
         copy_img[i,j] = 0
         
-  cv.imwrite(f'results/niblack-{img_name}', copy_img)
+  save_image(image_path, 'niblack', copy_img)
+
   if show:
     plt.imshow(copy_img, 'gray', vmin=0, vmax=255)
     plt.show()
