@@ -33,7 +33,7 @@ def global_thresholding(image_path, limiar=125, show=False):
     plt.imshow(img, 'gray', vmin=0, vmax=255)
     plt.show()
 
-def bernsen(image_path, n=10, show=True):
+def bernsen(image_path, n=10, show=False):
   np.seterr(over='ignore')
   gray_img = open_image(image_path)
 
@@ -130,9 +130,31 @@ def phansalskar(image_path, n, k=0.25, r=0.5, p=2, q=10, show=False):
     plt.imshow(gray_img, 'gray', vmin=0, vmax=255)
     plt.show()
 
+def contrast(image_path, n=10, show=True):
+  gray_img = open_image(image_path)
+
+  height, width, img_size, radius = get_image_defitions(gray_img, n)
+
+  for i in range(radius + 1, height - radius):
+    for j in range(radius + 1, width - radius):
+      block = gray_img[i-radius:i+radius, j-radius:j+radius]
+      
+      local_max = abs(block.max() - gray_img[i,j])
+      local_min = abs(gray_img[i,j] - block.min())
+
+      if (local_max > local_min):
+        gray_img[i,j] = 255
+      else:
+        gray_img[i,j] = 0
+
+  save_image(image_path, 'contrast', gray_img)
+  if show:
+    plt.imshow(gray_img, 'gray', vmin=0, vmax=255)
+    plt.show()
 
 # global_thresholding('images/baboon.pgm')
 # bernsen('images/baboon.pgm')
 # niblack('images/monarch.pgm', 1, 7)
 # sauvola_pietaksinen('images/monarch.pgm')
 # phansalskar('images/retina.pgm', 5)
+# contrast('images/retina.pgm')
