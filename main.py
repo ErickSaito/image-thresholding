@@ -152,9 +152,31 @@ def contrast(image_path, n=10, show=True):
     plt.imshow(gray_img, 'gray', vmin=0, vmax=255)
     plt.show()
 
+def mean(image_path, n=10, show=False):
+  gray_img = open_image(image_path)
+
+  height, width, img_size, radius = get_image_defitions(gray_img, n)
+
+  for i in range(radius + 1, height - radius):
+    for j in range(radius + 1, width - radius):
+      block = gray_img[i-radius:i+radius, j-radius:j+radius]
+      
+      mean = np.mean(block)
+
+      if (gray_img[i,j] > mean):
+        gray_img[i,j] = 255
+      else:
+        gray_img[i,j] = 0
+
+  save_image(image_path, 'mean', gray_img)
+  if show:
+    plt.imshow(gray_img, 'gray', vmin=0, vmax=255)
+    plt.show()
+
 # global_thresholding('images/baboon.pgm')
 # bernsen('images/baboon.pgm')
 # niblack('images/monarch.pgm', 1, 7)
 # sauvola_pietaksinen('images/monarch.pgm')
 # phansalskar('images/retina.pgm', 5)
 # contrast('images/retina.pgm')
+# mean('images/monarch.pgm')
