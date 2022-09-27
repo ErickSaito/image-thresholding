@@ -1,43 +1,29 @@
 import cv2 as cv
 import numpy as np
 import math
+from image_manager import ImageManager
 from matplotlib import pyplot as plt
 
-def open_image(image_path: str):
-  img = cv.imread(image_path)
-  gray_img = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
-
-  return gray_img
-
-def save_image(image_path: str, name: str, img):
-  img_name = image_path.split('/')[-1]
-  cv.imwrite(f'results/{name}-{img_name}', img)
-
-def get_image_defitions(img, n):
-  height = img.shape[0]
-  width = img.shape[1]
-  img_size = img.size
-  radius = int(n/2)
-
-  return height, width, img_size, radius
-
 def global_thresholding(image_path, limiar=125, show=False):
-  gray_img = open_image(image_path)
+  manager = ImageManager(image_path)
+  gray_img = manager.image
 
   gray_img[gray_img < limiar] = 0
   gray_img[gray_img >= limiar] = 255
   
-  save_image(image_path, 'global_thresholding', gray_img)
+  manager.image = gray_img
+  manager.save_image('global_thresholding')
 
   if show:
     plt.imshow(img, 'gray', vmin=0, vmax=255)
     plt.show()
 
 def bernsen(image_path, n=10, show=False):
-  np.seterr(over='ignore')
-  gray_img = open_image(image_path)
+  manager = ImageManager(image_path)
+  gray_img = manager.image
 
-  height, width, img_size, radius = get_image_defitions(gray_img, n)
+  np.seterr(over='ignore')
+  height, width, img_size, radius = manager.get_image_defitions(n)
 
   for i in range(radius + 1, height - radius):
     for j in range(radius + 1, width - radius):
@@ -50,15 +36,18 @@ def bernsen(image_path, n=10, show=False):
       else:
         gray_img[i,j] = 255
         
-  save_image(image_path, 'bernsen', gray_img)
+  manager.image = gray_img
+  manager.save_image('bernsen')
+
   if show:
     plt.imshow(gray_img, 'gray', vmin=0, vmax=255)
     plt.show()
 
 def niblack(image_path, k, n=15, show=False):
-  gray_img = open_image(image_path)
+  manager = ImageManager(image_path)
+  gray_img = manager.image
 
-  height, width, img_size, radius = get_image_defitions(gray_img, n)
+  height, width, img_size, radius = manager.get_image_defitions(n)
 
   for i in range(radius + 1, height - radius):
     for j in range(radius + 1, width - radius):
@@ -74,16 +63,18 @@ def niblack(image_path, k, n=15, show=False):
       else:
         gray_img[i,j] = 255
         
-  save_image(image_path, 'niblack', gray_img)
+  manager.image = gray_img
+  manager.save_image('niblack')
 
   if show:
     plt.imshow(gray_img, 'gray', vmin=0, vmax=255)
     plt.show()
 
 def sauvola_pietaksinen(image_path, k=0.5, n=7, r=128, show=False):
-  gray_img = open_image(image_path)
+  manager = ImageManager(image_path)
+  gray_img = manager.image
 
-  height, width, img_size, radius = get_image_defitions(gray_img, n)
+  height, width, img_size, radius = manager.get_image_defitions(n)
 
   for i in range(radius + 1, height - radius):
     for j in range(radius + 1, width - radius):
@@ -99,15 +90,17 @@ def sauvola_pietaksinen(image_path, k=0.5, n=7, r=128, show=False):
       else:
         gray_img[i,j] = 255
 
-  save_image(image_path, 'sauvola_pietaksinen', gray_img)
+  manager.image = gray_img
+  manager.save_image('sauvola_pietaksinen')
 
   if show:
     plt.imshow(gray_img, 'gray', vmin=0, vmax=255)
     plt.show()
 
 def phansalskar(image_path, n, k=0.25, r=0.5, p=2, q=10, show=False):
-  gray_img = open_image(image_path)
-  height, width, img_size, radius = get_image_defitions(gray_img, n)
+  manager = ImageManager(image_path)
+  gray_img = manager.image
+  height, width, img_size, radius = manager.get_image_defitions(n)
 
   r = r * 256
   for i in range(radius + 1, height - radius):
@@ -124,16 +117,18 @@ def phansalskar(image_path, n, k=0.25, r=0.5, p=2, q=10, show=False):
       else:
         gray_img[i,j] = 255
   
-  save_image(image_path, 'phansalskar', gray_img)
+  manager.image = gray_img
+  manager.save_image('phansalskar')
 
   if show:
     plt.imshow(gray_img, 'gray', vmin=0, vmax=255)
     plt.show()
 
-def contrast(image_path, n=10, show=True):
-  gray_img = open_image(image_path)
+def contrast(image_path, n=10, show=False):
+  manager = ImageManager(image_path)
+  gray_img = manager.image
 
-  height, width, img_size, radius = get_image_defitions(gray_img, n)
+  height, width, img_size, radius = manager.get_image_defitions(n)
 
   for i in range(radius + 1, height - radius):
     for j in range(radius + 1, width - radius):
@@ -147,15 +142,18 @@ def contrast(image_path, n=10, show=True):
       else:
         gray_img[i,j] = 0
 
-  save_image(image_path, 'contrast', gray_img)
+  manager.image = gray_img
+  manager.save_image('contrast')
+
   if show:
     plt.imshow(gray_img, 'gray', vmin=0, vmax=255)
     plt.show()
 
 def mean(image_path, n=10, show=False):
-  gray_img = open_image(image_path)
+  manager = ImageManager(image_path)
+  gray_img = manager.image
 
-  height, width, img_size, radius = get_image_defitions(gray_img, n)
+  height, width, img_size, radius = manager.get_image_defitions(n)
 
   for i in range(radius + 1, height - radius):
     for j in range(radius + 1, width - radius):
@@ -168,15 +166,17 @@ def mean(image_path, n=10, show=False):
       else:
         gray_img[i,j] = 0
 
-  save_image(image_path, 'mean', gray_img)
+  manager.image = gray_img
+  manager.save_image('mean')
   if show:
     plt.imshow(gray_img, 'gray', vmin=0, vmax=255)
     plt.show()
 
-def median(image_path, n=10, show=True):
-  gray_img = open_image(image_path)
+def median(image_path, n=10, show=False):
+  manager = ImageManager(image_path)
+  gray_img = manager.image
 
-  height, width, img_size, radius = get_image_defitions(gray_img, n)
+  height, width, img_size, radius = manager.get_image_defitions( n)
 
   for i in range(radius + 1, height - radius):
     for j in range(radius + 1, width - radius):
@@ -189,17 +189,19 @@ def median(image_path, n=10, show=True):
       else:
         gray_img[i,j] = 0
 
-  save_image(image_path, 'median', gray_img)
+
+  manager.image = gray_img
+  manager.save_image('median')
 
   if show:
     plt.imshow(gray_img, 'gray', vmin=0, vmax=255)
     plt.show()
 
-# global_thresholding('images/baboon.pgm')
-# bernsen('images/baboon.pgm')
-# niblack('images/monarch.pgm', 1, 7)
-# sauvola_pietaksinen('images/monarch.pgm')
-# phansalskar('images/retina.pgm', 5)
-# contrast('images/retina.pgm')
-# mean('images/monarch.pgm')
+global_thresholding('images/monarch.pgm')
+bernsen('images/retina.pgm')
+niblack('images/monarch.pgm', 1, 7)
+sauvola_pietaksinen('images/monarch.pgm')
+phansalskar('images/retina.pgm', 5)
+contrast('images/retina.pgm')
+mean('images/monarch.pgm')
 median('images/sonnet.pgm')
