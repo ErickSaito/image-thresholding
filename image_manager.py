@@ -11,7 +11,7 @@ class ImageManager():
 
   def save_image(self, process_name: str, img):
     image_name = self._image_path.split('/')[-1].split('.')[0]
-    cv.imwrite(f'results/{image_name}-{process_name}.pgm', img)
+    cv.imwrite(f'results/{image_name}-{process_name}.png', img)
 
   def get_image_defitions(self, n):
     height, width = self._image.shape
