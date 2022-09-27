@@ -1,207 +1,88 @@
-import cv2 as cv
-import numpy as np
-import math
-from image_manager import ImageManager
-from matplotlib import pyplot as plt
 
-def global_thresholding(image_path, limiar=125, show=False):
-  manager = ImageManager(image_path)
-  gray_img = manager.image
-
-  gray_img[gray_img < limiar] = 0
-  gray_img[gray_img >= limiar] = 255
-  
-  manager.image = gray_img
-  manager.save_image('global_thresholding')
-
-  if show:
-    plt.imshow(img, 'gray', vmin=0, vmax=255)
-    plt.show()
-
-def bernsen(image_path, n=10, show=False):
-  manager = ImageManager(image_path)
-  gray_img = manager.image
-
-  np.seterr(over='ignore')
-  height, width, img_size, radius = manager.get_image_defitions(n)
-
-  for i in range(radius + 1, height - radius):
-    for j in range(radius + 1, width - radius):
-      block = gray_img[i-radius:i+radius, j-radius:j+radius]
-
-      threshold = int((block.min() + block.max())/2)
-
-      if gray_img[i,j] < threshold:
-        gray_img[i,j] = 0
-      else:
-        gray_img[i,j] = 255
-        
-  manager.image = gray_img
-  manager.save_image('bernsen')
-
-  if show:
-    plt.imshow(gray_img, 'gray', vmin=0, vmax=255)
-    plt.show()
-
-def niblack(image_path, k, n=15, show=False):
-  manager = ImageManager(image_path)
-  gray_img = manager.image
-
-  height, width, img_size, radius = manager.get_image_defitions(n)
-
-  for i in range(radius + 1, height - radius):
-    for j in range(radius + 1, width - radius):
-      block = gray_img[i-radius:i+radius, j-radius:j+radius]
-
-      mean = np.mean(block)
-      std = np.std(block)
-
-      threshold = mean + k * std
-
-      if gray_img[i,j] < threshold:
-        gray_img[i,j] = 0
-      else:
-        gray_img[i,j] = 255
-        
-  manager.image = gray_img
-  manager.save_image('niblack')
-
-  if show:
-    plt.imshow(gray_img, 'gray', vmin=0, vmax=255)
-    plt.show()
-
-def sauvola_pietaksinen(image_path, k=0.5, n=7, r=128, show=False):
-  manager = ImageManager(image_path)
-  gray_img = manager.image
-
-  height, width, img_size, radius = manager.get_image_defitions(n)
-
-  for i in range(radius + 1, height - radius):
-    for j in range(radius + 1, width - radius):
-      block = gray_img[i-radius:i+radius, j-radius:j+radius]
-
-      mean = np.mean(block)
-      std = np.std(block)
-
-      threshold = mean * (1 + k * ((std / r) - 1))
-
-      if gray_img[i,j] < threshold:
-        gray_img[i,j] = 0
-      else:
-        gray_img[i,j] = 255
-
-  manager.image = gray_img
-  manager.save_image('sauvola_pietaksinen')
-
-  if show:
-    plt.imshow(gray_img, 'gray', vmin=0, vmax=255)
-    plt.show()
-
-def phansalskar(image_path, n, k=0.25, r=0.5, p=2, q=10, show=False):
-  manager = ImageManager(image_path)
-  gray_img = manager.image
-  height, width, img_size, radius = manager.get_image_defitions(n)
-
-  r = r * 256
-  for i in range(radius + 1, height - radius):
-    for j in range(radius + 1, width - radius):
-      block = gray_img[i-radius:i+radius, j-radius:j+radius]
-
-      mean = np.mean(block)
-      std = np.std(block)
-
-      threshold = mean * (1 + p * math.exp((q * (-1)) * mean) + (k * ((std/r) - 1)))
-
-      if gray_img[i,j] < threshold:
-        gray_img[i,j] = 0
-      else:
-        gray_img[i,j] = 255
-  
-  manager.image = gray_img
-  manager.save_image('phansalskar')
-
-  if show:
-    plt.imshow(gray_img, 'gray', vmin=0, vmax=255)
-    plt.show()
-
-def contrast(image_path, n=10, show=False):
-  manager = ImageManager(image_path)
-  gray_img = manager.image
-
-  height, width, img_size, radius = manager.get_image_defitions(n)
-
-  for i in range(radius + 1, height - radius):
-    for j in range(radius + 1, width - radius):
-      block = gray_img[i-radius:i+radius, j-radius:j+radius]
-      
-      local_max = abs(block.max() - gray_img[i,j])
-      local_min = abs(gray_img[i,j] - block.min())
-
-      if (local_max > local_min):
-        gray_img[i,j] = 255
-      else:
-        gray_img[i,j] = 0
-
-  manager.image = gray_img
-  manager.save_image('contrast')
-
-  if show:
-    plt.imshow(gray_img, 'gray', vmin=0, vmax=255)
-    plt.show()
-
-def mean(image_path, n=10, show=False):
-  manager = ImageManager(image_path)
-  gray_img = manager.image
-
-  height, width, img_size, radius = manager.get_image_defitions(n)
-
-  for i in range(radius + 1, height - radius):
-    for j in range(radius + 1, width - radius):
-      block = gray_img[i-radius:i+radius, j-radius:j+radius]
-      
-      mean = np.mean(block)
-
-      if (gray_img[i,j] > mean):
-        gray_img[i,j] = 255
-      else:
-        gray_img[i,j] = 0
-
-  manager.image = gray_img
-  manager.save_image('mean')
-  if show:
-    plt.imshow(gray_img, 'gray', vmin=0, vmax=255)
-    plt.show()
-
-def median(image_path, n=10, show=False):
-  manager = ImageManager(image_path)
-  gray_img = manager.image
-
-  height, width, img_size, radius = manager.get_image_defitions( n)
-
-  for i in range(radius + 1, height - radius):
-    for j in range(radius + 1, width - radius):
-      block = gray_img[i-radius:i+radius, j-radius:j+radius]
-      
-      median = np.median(block)
-
-      if (gray_img[i,j] > median):
-        gray_img[i,j] = 255
-      else:
-        gray_img[i,j] = 0
+from image_threshold import ImageThreshold
 
 
-  manager.image = gray_img
-  manager.save_image('median')
+def run_baboon():
+  baboon_threshold = ImageThreshold('images/baboon.pgm')
+  baboon_threshold.global_thresholding()
+  baboon_threshold.bernsen()
+  baboon_threshold.niblack(1)
+  baboon_threshold.sauvola_pietaksinen()
+  baboon_threshold.phansalskar(5)
+  baboon_threshold.contrast()
+  baboon_threshold.mean()
+  baboon_threshold.median()
 
-  if show:
-    plt.imshow(gray_img, 'gray', vmin=0, vmax=255)
-    plt.show()
+def run_fiducial():
+  fiducial_threshold = ImageThreshold('images/fiducial.pgm')
+  fiducial_threshold.global_thresholding()
+  fiducial_threshold.bernsen()
+  fiducial_threshold.niblack(1)
+  fiducial_threshold.sauvola_pietaksinen()
+  fiducial_threshold.phansalskar(5)
+  fiducial_threshold.contrast()
+  fiducial_threshold.mean()
+  fiducial_threshold.median()
 
-global_thresholding('images/monarch.pgm')
-bernsen('images/retina.pgm')
-niblack('images/monarch.pgm', 1, 7)
-sauvola_pietaksinen('images/monarch.pgm')
-phansalskar('images/retina.pgm', 5)
-contrast('images/retina.pgm')
-mean('images/monarch.pgm')
-median('images/sonnet.pgm')
+def run_monarch():
+  monarch_threshold = ImageThreshold('images/monarch.pgm')
+  monarch_threshold.global_thresholding()
+  monarch_threshold.bernsen()
+  monarch_threshold.niblack(1)
+  monarch_threshold.sauvola_pietaksinen()
+  monarch_threshold.phansalskar(5)
+  monarch_threshold.contrast()
+  monarch_threshold.mean()
+  monarch_threshold.median()
+
+def run_peppers():
+  peppers_threshold = ImageThreshold('images/peppers.pgm')
+  peppers_threshold.global_thresholding()
+  peppers_threshold.bernsen()
+  peppers_threshold.niblack(1)
+  peppers_threshold.sauvola_pietaksinen()
+  peppers_threshold.phansalskar(5)
+  peppers_threshold.contrast()
+  peppers_threshold.mean()
+  peppers_threshold.median()
+
+def run_retina():
+  retina_threshold = ImageThreshold('images/retina.pgm')
+  retina_threshold.global_thresholding()
+  retina_threshold.bernsen()
+  retina_threshold.niblack(1)
+  retina_threshold.sauvola_pietaksinen()
+  retina_threshold.phansalskar(5)
+  retina_threshold.contrast()
+  retina_threshold.mean()
+  retina_threshold.median()
+
+def run_sonnet():
+  sonnet_threshold = ImageThreshold('images/sonnet.pgm')
+  sonnet_threshold.global_thresholding()
+  sonnet_threshold.bernsen()
+  sonnet_threshold.niblack(1)
+  sonnet_threshold.sauvola_pietaksinen()
+  sonnet_threshold.phansalskar(5)
+  sonnet_threshold.contrast()
+  sonnet_threshold.mean()
+  sonnet_threshold.median()
+
+def run_wedge():
+  wedge_threshold = ImageThreshold('images/wedge.pgm')
+  wedge_threshold.global_thresholding()
+  wedge_threshold.bernsen()
+  wedge_threshold.niblack(1)
+  wedge_threshold.sauvola_pietaksinen()
+  wedge_threshold.phansalskar(5)
+  wedge_threshold.contrast()
+  wedge_threshold.mean()
+  wedge_threshold.median()
+
+run_baboon()
+run_fiducial()
+run_monarch()
+run_peppers()
+run_retina()
+run_sonnet()
+run_wedge()
