@@ -7,7 +7,7 @@ class ImageManager():
     self._image = cv.cvtColor(cv.imread(self._image_path), cv.COLOR_BGR2GRAY)
 
   def get_image(self):
-    return self._image
+    return self._image.copy()
 
   def save_image(self, process_name: str, img):
     image_name = self._image_path.split('/')[-1].split('.')[0]
