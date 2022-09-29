@@ -69,7 +69,7 @@ class ImageThreshold():
       plt.imshow(gray_img, 'gray', vmin=0, vmax=255)
       plt.show()
 
-  def sauvola_pietaksinen(self, k=0.5, n=7, r=128, show=False):
+  def sauvola_pietaksinen(self, k=0.5, n=9, r=128, show=False):
     gray_img = self._manager.get_image()
 
     height, width, img_size, radius = self._manager.get_image_defitions(n)
